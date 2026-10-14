@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  compose-config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Validate docker compose config (build + setup profiles)
+        run: |
+          docker compose \
+            --env-file docker/.env.example \
+            -f docker/compose.yaml \
+            --profile build --profile setup \
+            config -q
+
+  nginx-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: nginx -t against docker/nginx/default.conf
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}/docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro" \
+            nginx:1.30.5-alpine nginx -t
+
+  hugo-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build site with the pinned Hugo image
+        run: |
+          mkdir -p /tmp/hugo-ci-out
+          docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            -v "${{ github.workspace }}:/src" \
+            -v "/tmp/hugo-ci-out:/dist" \
+            -w /src \
+            ghcr.io/gohugoio/hugo:v0.168.0 \
+            --destination /dist --gc --minify
+
+      - name: Confirm the home page was produced
+        run: test -f /tmp/hugo-ci-out/index.html

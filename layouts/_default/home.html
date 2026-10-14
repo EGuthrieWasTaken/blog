@@ -1,0 +1,19 @@
+{{ define "main" }}
+<article class="content">
+  {{ .Content }}
+</article>
+
+<section class="recent-posts">
+  <h2>Recent posts</h2>
+  <ul class="post-list">
+    {{ range first 10 (where .Site.RegularPages "Type" "posts") }}
+    <li>
+      <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+      <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2 January 2006" }}</time>
+    </li>
+    {{ end }}
+  </ul>
+</section>
+
+{{ partial "subscribe.html" . }}
+{{ end }}

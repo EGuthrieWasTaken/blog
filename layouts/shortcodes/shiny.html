@@ -1,0 +1,19 @@
+{{- /*
+  Usage: {{< shiny app="example" height="650" >}}
+  Renders a lazy-loaded iframe to <params.shinyBaseURL>/<app>/, served by the
+  self-hosted Shiny Server (see docker/shiny/ and shiny-apps/).
+*/ -}}
+{{ $app := .Get "app" }}
+{{ $height := .Get "height" | default "600" }}
+{{ if not $app }}{{ errorf "shiny shortcode in %q requires an \"app\" argument" .Page.File.Filename }}{{ end }}
+<div class="shiny-embed">
+  <iframe
+    src="{{ .Page.Site.Params.shinyBaseURL }}/{{ $app }}/"
+    title="Interactive Shiny app: {{ $app }}"
+    height="{{ $height }}"
+    loading="lazy"
+    referrerpolicy="no-referrer"
+    sandbox="allow-scripts allow-same-origin allow-forms"
+    class="shiny-iframe">
+  </iframe>
+</div>

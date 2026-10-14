@@ -1,0 +1,147 @@
+# Single stack for the whole blog deployment: nginx (static site + public
+# Listmonk proxy), Shiny Server, and Listmonk + its Postgres database.
+#
+# All services join one EXTERNAL Docker network (created beforehand, e.g.
+# `docker network create blog-net`) so they share it with the separately
+# managed cloudflared tunnel container. Set DOCKER_NETWORK in .env to match
+# whatever network your tunnel container already uses.
+#
+# Compose Manager keeps its project files on the unRAID flash drive, not in
+# this repo, so every repo-relative path below is driven by REPO_DIR
+# (checkout location) or APPDATA_DIR/BLOG_PUBLIC (persistent data/logs and
+# the built site). Set these in .env -- see .env.example.
+#
+# You don't have to run the whole stack at once, e.g.:
+#   docker compose up -d blog shiny          # site + interactive figures only
+#   docker compose up -d listmonk-db listmonk  # just the mailing list
+#   docker compose --profile setup run --rm listmonk-setup  # first-run install
+#   docker compose --profile build run --rm hugo             # one-shot build
+
+networks:
+  default:
+    name: ${DOCKER_NETWORK:-blog-net}
+    external: true
+
+x-listmonk-env: &listmonk-env
+  TZ: Etc/UTC
+  LISTMONK_app__address: "0.0.0.0:9000"
+  LISTMONK_db__host: listmonk-db
+  LISTMONK_db__port: "5432"
+  LISTMONK_db__user: ${LISTMONK_DB_USER:-listmonk}
+  LISTMONK_db__password: ${LISTMONK_DB_PASSWORD}
+  LISTMONK_db__database: ${LISTMONK_DB_NAME:-listmonk}
+  LISTMONK_db__ssl_mode: disable
+
+services:
+
+  # --- Static site + public Listmonk proxy --------------------------------
+  blog:
+    image: nginx:1.30.5-alpine
+    container_name: blog
+    restart: unless-stopped
+    volumes:
+      - ${BLOG_PUBLIC:-/mnt/user/appdata/blog/public}:/usr/share/nginx/html:ro
+      - ${REPO_DIR}/docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # --- One-shot Hugo builder (profile: build) ------------------------------
+  # `docker compose --profile build run --rm hugo` builds into ./public
+  # inside REPO_DIR. build.sh wraps the equivalent `docker run` directly so
+  # it can build into a temp dir and swap it into BLOG_PUBLIC atomically;
+  # this service is for quick manual/ad-hoc builds.
+  hugo:
+    image: ghcr.io/gohugoio/hugo:v0.168.0
+    profiles: ["build"]
+    working_dir: /src
+    volumes:
+      - ${REPO_DIR}:/src
+    command: ["--destination", "/src/public", "--gc", "--minify"]
+
+  # --- Shiny Server ---------------------------------------------------------
+  shiny:
+    image: ghcr.io/${GITHUB_OWNER:-eguthriewastaken}/shiny-plotly:latest
+    build:
+      context: ${REPO_DIR}/docker/shiny
+      dockerfile: Dockerfile
+    container_name: shiny
+    restart: unless-stopped
+    volumes:
+      - ${REPO_DIR}/shiny-apps:/srv/shiny-server:ro
+      - ${APPDATA_DIR:-/mnt/user/appdata/blog}/shiny-logs:/var/log/shiny-server
+    # LAN-only, for testing an app directly without going through nginx/the
+    # tunnel. Uncomment and set SHINY_BIND in .env (e.g. 127.0.0.1:3838) to
+    # enable; open-source Shiny Server has no auth of its own.
+    # ports:
+    #   - "${SHINY_BIND}:3838"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/localhost/3838"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # --- Listmonk --------------------------------------------------------------
+  listmonk-db:
+    image: postgres:17.11-alpine
+    container_name: listmonk-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${LISTMONK_DB_USER:-listmonk}
+      POSTGRES_PASSWORD: ${LISTMONK_DB_PASSWORD}
+      POSTGRES_DB: ${LISTMONK_DB_NAME:-listmonk}
+    volumes:
+      - ${APPDATA_DIR:-/mnt/user/appdata/blog}/listmonk-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+
+  # One-time installer (profile: setup). Run once on first deploy:
+  #   docker compose --profile setup run --rm listmonk-setup
+  # Safe to re-run after upgrades: --install --idempotent and --upgrade
+  # --yes are both no-ops against an already-up-to-date schema.
+  listmonk-setup:
+    image: listmonk/listmonk:v6.2.0
+    profiles: ["setup"]
+    environment:
+      <<: *listmonk-env
+      LISTMONK_ADMIN_USER: ${LISTMONK_ADMIN_USER}
+      LISTMONK_ADMIN_PASSWORD: ${LISTMONK_ADMIN_PASSWORD}
+      LISTMONK_ADMIN_EMAIL: ${LISTMONK_ADMIN_EMAIL}
+    entrypoint: ["sh", "-c"]
+    command:
+      - "./listmonk --install --idempotent --yes --config '' && ./listmonk --upgrade --yes --config ''"
+    depends_on:
+      listmonk-db:
+        condition: service_healthy
+
+  listmonk:
+    image: listmonk/listmonk:v6.2.0
+    container_name: listmonk
+    restart: unless-stopped
+    environment:
+      <<: *listmonk-env
+    command: ["./listmonk", "--config", ""]
+    volumes:
+      - ${APPDATA_DIR:-/mnt/user/appdata/blog}/listmonk-uploads:/listmonk/uploads
+    # LAN-only admin UI/API. Never put this behind the public tunnel --
+    # nginx (see docker/nginx/default.conf) only proxies public endpoints
+    # for lists.guthrieec.dev and returns 404 for /admin and /api.
+    ports:
+      - "${LISTMONK_ADMIN_BIND}:9000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9000/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    depends_on:
+      listmonk-db:
+        condition: service_healthy

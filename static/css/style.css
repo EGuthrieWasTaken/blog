@@ -1,0 +1,158 @@
+:root {
+  --bg-color: #ffffff;
+  --text-color: #1a1a1a;
+  --muted-color: #595959;
+  --link-color: #1a56db;
+  --border-color: #e0e0e0;
+  --code-bg: #f5f5f5;
+  --max-width: 42rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #15181c;
+    --text-color: #e6e6e6;
+    --muted-color: #a3a3a3;
+    --link-color: #7aa7ff;
+    --border-color: #2e333a;
+    --code-bg: #1e2126;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-color);
+  color: var(--text-color);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+}
+
+a {
+  color: var(--link-color);
+}
+
+.site-header,
+.site-footer,
+.site-main {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 1rem 1.25rem;
+}
+
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.site-title {
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--text-color);
+}
+
+.site-nav a {
+  margin-left: 1rem;
+  text-decoration: none;
+}
+
+.site-footer {
+  border-top: 1px solid var(--border-color);
+  color: var(--muted-color);
+  font-size: 0.9rem;
+}
+
+.post-list {
+  list-style: none;
+  padding: 0;
+}
+
+.post-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.post-list time {
+  color: var(--muted-color);
+  white-space: nowrap;
+}
+
+pre,
+code {
+  background: var(--code-bg);
+  border-radius: 4px;
+}
+
+pre {
+  padding: 0.75rem;
+  overflow-x: auto;
+}
+
+code {
+  padding: 0.1rem 0.3rem;
+}
+
+pre code {
+  padding: 0;
+  background: none;
+}
+
+.shiny-embed {
+  margin: 1.5rem 0;
+}
+
+.shiny-iframe {
+  width: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+.subscribe-form {
+  margin-top: 2rem;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+}
+
+.subscribe-form form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: end;
+}
+
+.subscribe-form label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--muted-color);
+}
+
+.subscribe-form input[type="email"],
+.subscribe-form input[type="text"] {
+  padding: 0.4rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+
+.subscribe-form button {
+  padding: 0.45rem 1rem;
+  border: 1px solid var(--link-color);
+  border-radius: 4px;
+  background: var(--link-color);
+  color: #fff;
+  cursor: pointer;
+}

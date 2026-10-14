@@ -1,0 +1,10 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} · {{ .Site.Title }}{{ end }}</title>
+<meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
+<link rel="stylesheet" href="{{ "css/style.css" | absURL }}">
+<link rel="alternate" type="application/rss+xml" title="{{ .Site.Title }}" href="{{ "index.xml" | absURL }}">
+{{ if .Params.math }}
+<link rel="stylesheet" href="{{ "katex/katex.min.css" | absURL }}">
+{{ end }}
+<!-- No third-party trackers or analytics are loaded on this site. -->

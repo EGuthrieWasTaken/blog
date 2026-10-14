@@ -1,0 +1,55 @@
+baseURL = "https://www.guthrieec.dev/"
+title = "Ethan Guthrie"
+locale = "en-us"
+enableRobotsTXT = true
+
+# Generated Markdown lives in content/ (exported by ox-hugo from content-org/).
+# The build container has no Emacs, so content/ is committed to git.
+
+[pagination]
+pagerSize = 10
+
+[outputs]
+home = ["HTML", "RSS"]
+section = ["HTML", "RSS"]
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = false
+    [markup.goldmark.extensions]
+      [markup.goldmark.extensions.passthrough]
+        enable = true
+        [markup.goldmark.extensions.passthrough.delimiters]
+          # Goldmark must leave math source untouched so that underscores,
+          # asterisks, etc. inside LaTeX survive to the browser, where
+          # self-hosted KaTeX (see static/katex/ and partials/math.html)
+          # renders it client-side. Hugo has no server-side KaTeX renderer.
+          block = [['\[', '\]'], ['$$', '$$']]
+          inline = [['\(', '\)']]
+  [markup.highlight]
+    noClasses = false
+
+[params]
+  description = "Academic blog of Ethan Guthrie."
+  author = "Ethan Guthrie"
+  # Base URL of the self-hosted Shiny Server, used by the {{< shiny >}} shortcode.
+  shinyBaseURL = "https://shiny.guthrieec.dev"
+  # Base URL of the public Listmonk instance, used by the {{< subscribe >}} shortcode.
+  listmonkBaseURL = "https://lists.guthrieec.dev"
+  # UUID(s) of the Listmonk list(s) the subscribe form signs readers up for.
+  # Find these under Lists in the Listmonk admin UI.
+  listmonkListUUIDs = ["00000000-0000-0000-0000-000000000000"]
+
+[menu]
+  [[menu.main]]
+    name = "Home"
+    url = "/"
+    weight = 1
+  [[menu.main]]
+    name = "Posts"
+    url = "/posts/"
+    weight = 2
+
+[sitemap]
+  changeFreq = "weekly"

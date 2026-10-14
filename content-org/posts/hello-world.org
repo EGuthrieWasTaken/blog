@@ -1,0 +1,32 @@
+#+title: Hello, World
+#+date: 2026-10-13T09:00:00-05:00
+#+hugo_base_dir: ../..
+#+hugo_section: posts
+#+hugo_front_matter_format: yaml
+#+hugo_draft: false
+#+hugo_custom_front_matter: :math true
+#+options: toc:nil num:nil
+
+This is the first post on this blog, exported from Org mode to Markdown
+with [[https://github.com/kaushalmodi/ox-hugo][ox-hugo]] and built into static HTML with [[https://gohugo.io/][Hugo]].
+
+* Math
+
+Inline math such as \(E = mc^2\) and display math both render with
+self-hosted [[https://katex.org/][KaTeX]] -- no CDN, no third-party scripts.
+
+\[
+\int_0^\infty e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}
+\]
+
+* An interactive figure
+
+The figure below is served by the self-hosted Shiny app in
+=shiny-apps/example/= via the self-hosted Shiny Server, embedded with the
+=shiny= shortcode:
+
+{{< shiny app="example" height="650" >}}
+
+* Subscribe
+
+{{< subscribe >}}

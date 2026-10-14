@@ -1,0 +1,24 @@
+{{- /*
+  Plain-HTML subscription form, no JavaScript required. Posts directly to
+  Listmonk's public subscription endpoint (see docker/nginx/default.conf for
+  the lists.guthrieec.dev proxy allowlist). List UUIDs come from
+  params.listmonkListUUIDs in hugo.toml. Field names (email, name, l, nonce)
+  mirror Listmonk's own Lists -> Forms generated snippet; the "nonce" field
+  is a honeypot and must stay empty. Re-check field names against Lists ->
+  Forms in the admin UI after a Listmonk upgrade.
+*/ -}}
+<section class="subscribe-form">
+  <h2>Subscribe</h2>
+  <p>Get new posts by email.</p>
+  <form method="post" action="{{ .Site.Params.listmonkBaseURL }}/subscription/form" class="subscribe">
+    <input type="hidden" name="nonce" value="">
+    {{ range .Site.Params.listmonkListUUIDs }}
+    <input type="hidden" name="l" value="{{ . }}">
+    {{ end }}
+    <label for="subscribe-email">Email address</label>
+    <input id="subscribe-email" type="email" name="email" placeholder="you@example.com" required>
+    <label for="subscribe-name">Name (optional)</label>
+    <input id="subscribe-name" type="text" name="name" placeholder="Jane Doe">
+    <button type="submit">Subscribe</button>
+  </form>
+</section>

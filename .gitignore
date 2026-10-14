@@ -1,0 +1,28 @@
+# Hugo build output and caches
+public/
+resources/_gen/
+.hugo_build.lock
+
+# build.sh temp workspace (normally created under $TMPDIR, kept here as a
+# safety net if TMPDIR ever resolves inside the repo)
+hugo-build.*
+
+# Environment files with secrets -- only .env.example is tracked
+.env
+.env.*
+!.env.example
+
+# Local data/log dirs if ever created inside the repo for quick testing
+docker/listmonk-data/
+docker/shiny-logs/
+
+# Emacs
+*~
+\#*\#
+.\#*
+*.elc
+ltximg/
+
+# OS junk
+.DS_Store
+Thumbs.db

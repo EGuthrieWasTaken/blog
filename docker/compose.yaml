@@ -36,7 +36,7 @@ services:
 
   # --- Static site + public Listmonk proxy --------------------------------
   blog:
-    image: nginx:1.30.5-alpine
+    image: nginx:1.31.0-alpine
     container_name: blog
     restart: unless-stopped
     volumes:

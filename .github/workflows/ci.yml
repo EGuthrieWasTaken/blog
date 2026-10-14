@@ -37,11 +37,15 @@ jobs:
 
       - name: Build site with the pinned Hugo image
         run: |
-          mkdir -p /tmp/hugo-ci-out
+          mkdir -p /tmp/hugo-ci-out /tmp/hugo-ci-cache
+          # HUGO_CACHEDIR keeps Hugo's --gc caches off the image's baked-in
+          # /cache (owned by uid 1000, not the runner's uid used via --user).
           docker run --rm \
             --user "$(id -u):$(id -g)" \
+            -e HUGO_CACHEDIR=/hugo-cache \
             -v "${{ github.workspace }}:/src" \
             -v "/tmp/hugo-ci-out:/dist" \
+            -v "/tmp/hugo-ci-cache:/hugo-cache" \
             -w /src \
             ghcr.io/gohugoio/hugo:v0.168.0 \
             --destination /dist --gc --minify

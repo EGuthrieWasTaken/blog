@@ -10,7 +10,9 @@ updates:
     schedule:
       interval: "weekly"
 
-  - package-ecosystem: "docker"
+  # compose.yaml's own image: tags (nginx, postgres, listmonk) -- the
+  # "docker" ecosystem only reads Dockerfiles, not compose files.
+  - package-ecosystem: "docker-compose"
     directory: "/docker"
     schedule:
       interval: "weekly"

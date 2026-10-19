@@ -1,6 +1,5 @@
-# Example Shiny app: a normal-distribution density curve driven by
-# numericInput boxes below the plot. Axis limits are fixed so the layout
-# never jumps as inputs change. Embedded in posts via the `shiny` shortcode,
+# Example Shiny app: a normal-distribution sample plot driven by
+# numericInput boxes below the plot. Embedded in posts via the `shiny` shortcode,
 # e.g. {{< shiny app="example" height="650" >}}
 
 library(shiny)

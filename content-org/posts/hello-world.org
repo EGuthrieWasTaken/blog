@@ -23,7 +23,7 @@ self-hosted [[https://katex.org/][KaTeX]] -- no CDN, no third-party scripts.
 
 The figure below is served by the self-hosted Shiny app in
 =shiny-apps/example/= via the self-hosted Shiny Server, embedded with the
-=shiny= shortcode:
+=shiny= shortcode. It's basically a GUI for `rnorm()`.
 
 {{< shiny app="example" height="650" >}}
 

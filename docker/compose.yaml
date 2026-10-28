@@ -55,7 +55,7 @@ services:
   # it can build into a temp dir and swap it into BLOG_PUBLIC atomically;
   # this service is for quick manual/ad-hoc builds.
   hugo:
-    image: ghcr.io/gohugoio/hugo:v0.168.0
+    image: ghcr.io/gohugoio/hugo:v0.169.0
     profiles: ["build"]
     working_dir: /src
     volumes:
